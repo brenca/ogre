@@ -57,10 +57,11 @@ if (APPLE)
 endif ()
 
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/src/GLSLES/include)
+include_directories("S:/electron-gp/src" "S:/electron-gp/src/gpu" "S:/electron-gp/src/third_party/khronos")
 
-add_library(RenderSystem_GLES2 ${OGRE_LIB_TYPE} ${HEADER_FILES} ${GLESW_HEADERS} ${KHR_HEADERS} ${PLATFORM_HEADERS} ${SOURCE_FILES} ${PLATFORM_SOURCES} ${GLSLES_FILES})
-target_link_libraries(RenderSystem_GLES2 OgreMain OgreGLSupport ${OPENGLES2_LIBRARIES} ${CMAKE_DL_LIBS})
-target_include_directories(RenderSystem_GLES2 PUBLIC 
+add_library(RenderSystem_GLES2 STATIC ${HEADER_FILES} ${GLESW_HEADERS} ${KHR_HEADERS} ${PLATFORM_HEADERS} ${SOURCE_FILES} ${PLATFORM_SOURCES} ${GLSLES_FILES})
+target_link_libraries(RenderSystem_GLES2 OgreMain OgreGLSupport "S:/electron-gp/src/out/Release/electron.lib" ${CMAKE_DL_LIBS})
+target_include_directories(RenderSystem_GLES2 PUBLIC
     "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>"
     $<INSTALL_INTERFACE:include/OGRE/RenderSystems/GLES2>)
 
@@ -90,7 +91,6 @@ generate_export_header(RenderSystem_GLES2
 ogre_config_plugin(RenderSystem_GLES2)
 
 install(FILES ${HEADER_FILES} ${GLSUPPORT_HEADERS} DESTINATION include/OGRE/RenderSystems/GLES2)
-install(FILES "include/GLES2/gl2ext.h" DESTINATION include/OGRE/RenderSystems/GLES2/GLES2)
 install(FILES ${GLESW_HEADERS} DESTINATION include/OGRE/RenderSystems/GLES2/${GLESW_HEADER_INSTALL})
 install(FILES ${KHR_HEADERS} DESTINATION include/OGRE/RenderSystems/GLES2/KHR)
 install(FILES ${PLATFORM_HEADERS} DESTINATION include/OGRE/RenderSystems/GLES2/${PLATFORM_HEADER_INSTALL})

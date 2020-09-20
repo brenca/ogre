@@ -47,7 +47,6 @@ THE SOFTWARE.
 #endif
 #include "OgreGLSLESLinkProgram.h"
 #include "OgreGLSLESProgramManager.h"
-#include "OgreGLSLESProgramPipeline.h"
 #include "OgreGLES2StateCacheManager.h"
 #include "OgreRenderWindow.h"
 #include "OgreGLES2PixelFormat.h"
@@ -70,39 +69,6 @@ Ogre::GLES2ManagedResourceManager* Ogre::GLES2RenderSystem::mResourceManager = N
 #endif
 
 using namespace std;
-
-static void gl2ext_to_gl3core() {
-    glUnmapBufferOES = glUnmapBuffer;
-    glRenderbufferStorageMultisampleAPPLE = glRenderbufferStorageMultisample;
-
-    glGenQueriesEXT = glGenQueries;
-    glDeleteQueriesEXT = glDeleteQueries;
-    glBeginQueryEXT = glBeginQuery;
-    glEndQueryEXT = glEndQuery;
-    glGetQueryObjectuivEXT = glGetQueryObjectuiv;
-
-    glMapBufferRangeEXT = glMapBufferRange;
-    glFlushMappedBufferRangeEXT = glFlushMappedBufferRange;
-
-    glTexImage3DOES = (PFNGLTEXIMAGE3DOESPROC)glTexImage3D;
-    glCompressedTexImage3DOES = glCompressedTexImage3D;
-    glTexSubImage3DOES = glTexSubImage3D;
-    glCompressedTexSubImage3DOES = glCompressedTexSubImage3D;
-
-    glFenceSyncAPPLE = glFenceSync;
-    glClientWaitSyncAPPLE = glClientWaitSync;
-    glDeleteSyncAPPLE = glDeleteSync;
-
-    glProgramBinaryOES = glProgramBinary;
-    glGetProgramBinaryOES = glGetProgramBinary;
-
-    glDrawElementsInstancedEXT = glDrawElementsInstanced;
-    glDrawArraysInstancedEXT = glDrawArraysInstanced;
-    glVertexAttribDivisorEXT = glVertexAttribDivisor;
-    glBindVertexArrayOES = glBindVertexArray;
-    glGenVertexArraysOES = glGenVertexArrays;
-    glDeleteVertexArraysOES = glDeleteVertexArrays;
-}
 
 namespace Ogre {
 
@@ -250,15 +216,16 @@ namespace Ogre {
         rsc->parseVendorFromString(mVendor);
 
         // Multitexturing support and set number of texture units
-        GLint units;
+        GLint units = 0;
         OGRE_CHECK_GL_ERROR(glGetIntegerv(GL_MAX_TEXTURE_IMAGE_UNITS, &units));
         rsc->setNumTextureUnits(std::min(OGRE_MAX_TEXTURE_LAYERS, units));
 
-        glGetIntegerv( GL_MAX_VERTEX_ATTRIBS , &units);
-        rsc->setNumVertexAttributes(units);
+        GLint attribs = 0;
+        glGetIntegerv( GL_MAX_VERTEX_ATTRIBS , &attribs);
+        rsc->setNumVertexAttributes(attribs);
 
         // Check for hardware stencil support and set bit depth
-        GLint stencil;
+        GLint stencil = 0;
 
         OGRE_CHECK_GL_ERROR(glGetIntegerv(GL_STENCIL_BITS, &stencil));
 
@@ -344,7 +311,7 @@ namespace Ogre {
         {
             // Probe number of draw buffers
             // Only makes sense with FBO support, so probe here
-            GLint buffers;
+            GLint buffers = 0;
             glGetIntegerv(GL_MAX_DRAW_BUFFERS, &buffers);
             rsc->setNumMultiRenderTargets(
                 std::min<int>(buffers, (GLint)OGRE_MAX_MULTIPLE_RENDER_TARGETS));
@@ -469,7 +436,7 @@ namespace Ogre {
         if (hasMinGLVersion(3, 0) || checkExtension("GL_OES_get_program_binary"))
         {
             // http://www.khronos.org/registry/gles/extensions/OES/OES_get_program_binary.txt
-            GLint formats;
+            GLint formats = 0;
             OGRE_CHECK_GL_ERROR(glGetIntegerv(GL_NUM_PROGRAM_BINARY_FORMATS_OES, &formats));
 
             if(formats > 0)
@@ -483,9 +450,6 @@ namespace Ogre {
         else if(checkExtension("GL_ANGLE_instanced_arrays"))
         {
             rsc->setCapability(RSC_VERTEX_BUFFER_INSTANCE_DATA);
-            glDrawElementsInstancedEXT = glDrawElementsInstancedANGLE;
-            glDrawArraysInstancedEXT = glDrawArraysInstancedANGLE;
-            glVertexAttribDivisorEXT = glVertexAttribDivisorANGLE;
         }
 
         if (checkExtension("GL_EXT_debug_marker") &&
@@ -1389,7 +1353,7 @@ namespace Ogre {
 
                 if(hasInstanceData && getCapabilities()->hasCapability(RSC_VERTEX_BUFFER_INSTANCE_DATA))
                 {
-                    OGRE_CHECK_GL_ERROR(glDrawElementsInstancedEXT((polyMode == GL_FILL) ? primType : polyMode, static_cast<GLsizei>(op.indexData->indexCount), indexType, pBufferData, static_cast<GLsizei>(numberOfInstances)));
+                    OGRE_CHECK_GL_ERROR(glDrawElementsInstancedANGLE((polyMode == GL_FILL) ? primType : polyMode, static_cast<GLsizei>(op.indexData->indexCount), indexType, pBufferData, static_cast<GLsizei>(numberOfInstances)));
                 }
                 else
                 {
@@ -1412,7 +1376,7 @@ namespace Ogre {
 
                 if(getCapabilities()->hasCapability(RSC_VERTEX_BUFFER_INSTANCE_DATA) && hasInstanceData)
                 {
-                    OGRE_CHECK_GL_ERROR(glDrawArraysInstancedEXT((polyMode == GL_FILL) ? primType : polyMode, 0, static_cast<GLsizei>(op.vertexData->vertexCount), static_cast<GLsizei>(numberOfInstances)));
+                    OGRE_CHECK_GL_ERROR(glDrawArraysInstancedANGLE((polyMode == GL_FILL) ? primType : polyMode, 0, static_cast<GLsizei>(op.vertexData->vertexCount), static_cast<GLsizei>(numberOfInstances)));
                 }
                 else
                 {
@@ -1435,7 +1399,7 @@ namespace Ogre {
 
             // Unbind any instance attributes
             for (std::vector<GLuint>::iterator ai = mRenderInstanceAttribsBound.begin(); ai != mRenderInstanceAttribsBound.end(); ++ai)
-                OGRE_CHECK_GL_ERROR(glVertexAttribDivisorEXT(*ai, 0));
+                OGRE_CHECK_GL_ERROR(glVertexAttribDivisorANGLE(*ai, 0));
         }
         mRenderAttribsBound.clear();
         mRenderInstanceAttribsBound.clear();
@@ -1696,7 +1660,6 @@ namespace Ogre {
         mStateCacheManager = mCurrentContext->createOrRetrieveStateCacheManager<GLES2StateCacheManager>();
 
         if(hasMinGLVersion(3, 0)) {
-            gl2ext_to_gl3core();
             GLES2PixelUtil::useSizedFormats();
         }
 
@@ -1955,7 +1918,7 @@ namespace Ogre {
             {
                 if (hwGlBuffer->isInstanceData())
                 {
-                    OGRE_CHECK_GL_ERROR(glVertexAttribDivisorEXT(attrib, static_cast<GLuint>(hwGlBuffer->getInstanceDataStepRate())));
+                    OGRE_CHECK_GL_ERROR(glVertexAttribDivisorANGLE(attrib, static_cast<GLuint>(hwGlBuffer->getInstanceDataStepRate())));
                     mRenderInstanceAttribsBound.push_back(attrib);
                 }
             }
