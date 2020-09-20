@@ -51,27 +51,12 @@ namespace Ogre {
         // Generate framebuffer object
         OGRE_CHECK_GL_ERROR(glGenFramebuffers(1, &mFB));
 
-	   if(rs->getCapabilities()->hasCapability(RSC_DEBUG))
-       {
-#if OGRE_PLATFORM == OGRE_PLATFORM_APPLE_IOS
-           OGRE_CHECK_GL_ERROR(glBindFramebuffer(GL_FRAMEBUFFER, mFB)); // to avoid GL_INVALID_OPERATION in glLabelObjectEXT(GL_FRAMEBUFFER,...) on iOS 
-#endif
-           OGRE_CHECK_GL_ERROR(glLabelObjectEXT(GL_FRAMEBUFFER, mFB, 0, ("FBO #" + StringConverter::toString(mFB)).c_str()));
-       }
-
         mNumSamples = std::min(mNumSamples, manager->getMaxFSAASamples());
 
         // Will we need a second FBO to do multisampling?
         if (mNumSamples)
         {
             OGRE_CHECK_GL_ERROR(glGenFramebuffers(1, &mMultisampleFB));
-            if(rs->getCapabilities()->hasCapability(RSC_DEBUG))
-            {
-#if OGRE_PLATFORM == OGRE_PLATFORM_APPLE_IOS
-                OGRE_CHECK_GL_ERROR(glBindFramebuffer(GL_FRAMEBUFFER, mMultisampleFB)); // to avoid GL_INVALID_OPERATION in glLabelObjectEXT(GL_FRAMEBUFFER,...) on iOS 
-#endif
-                OGRE_CHECK_GL_ERROR(glLabelObjectEXT(GL_FRAMEBUFFER, mMultisampleFB, 0, ("MSAA FBO #" + StringConverter::toString(mMultisampleFB)).c_str()));
-            }
         }
         else
         {
@@ -225,7 +210,7 @@ namespace Ogre {
 
             // Drawbuffer extension supported, use it
             if(!isDepth)
-                OGRE_CHECK_GL_ERROR(glDrawBuffers(n, bufs));
+                OGRE_CHECK_GL_ERROR(glDrawBuffersEXT(n, bufs));
         }
         // Check status
         GLuint status;
@@ -330,7 +315,7 @@ namespace Ogre {
             uint32 height = mColour[0].buffer->getHeight();
             OGRE_CHECK_GL_ERROR(glBindFramebuffer(GL_READ_FRAMEBUFFER, mMultisampleFB));
             OGRE_CHECK_GL_ERROR(glBindFramebuffer(GL_DRAW_FRAMEBUFFER, mFB));
-            OGRE_CHECK_GL_ERROR(glBlitFramebuffer(0, 0, width, height, 0, 0, width, height, GL_COLOR_BUFFER_BIT, GL_NEAREST));
+            OGRE_CHECK_GL_ERROR(glBlitFramebufferCHROMIUM(0, 0, width, height, 0, 0, width, height, GL_COLOR_BUFFER_BIT, GL_NEAREST));
             // Unbind
             OGRE_CHECK_GL_ERROR(glBindFramebuffer(GL_FRAMEBUFFER, oldfb));
         }

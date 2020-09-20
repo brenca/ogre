@@ -150,7 +150,7 @@ if (MSVC)
 	set(CMAKE_CXX_FLAGS_RELWITHDEBINFO "${CMAKE_CXX_FLAGS_RELWITHDEBINFO} /bigobj")
   endif ()
 
-  if (OGRE_PROJECT_FOLDERS)  
+  if (OGRE_PROJECT_FOLDERS)
     # Turn on the ability to create folders to organize projects (.vcproj)
     # It creates "CMakePredefinedTargets" folder by default and adds CMake
     # defined projects like INSTALL.vcproj and ZERO_CHECK.vcproj
@@ -296,7 +296,7 @@ include(Dependencies)
 # Customise what to build
 option(OGRE_STATIC "Static build" FALSE)
 cmake_dependent_option(OGRE_ENABLE_PRECOMPILED_HEADERS "Use precompiled headers to speed up build" TRUE "NOT MINGW; NOT EMSCRIPTEN" FALSE)
-set(OGRE_RESOURCEMANAGER_STRICT "2" CACHE STRING 
+set(OGRE_RESOURCEMANAGER_STRICT "2" CACHE STRING
   "Make ResourceManager strict for faster operation. Possible values:
   0 - OFF search in all groups twice - for case sensitive and insensitive lookup [DEPRECATED]
   1 - PEDANTIC require an explicit resource group. Case sensitive lookup.
@@ -310,7 +310,7 @@ cmake_dependent_option(OGRE_BUILD_RENDERSYSTEM_D3D9 "Build Direct3D9 RenderSyste
 cmake_dependent_option(OGRE_BUILD_RENDERSYSTEM_D3D11 "Build Direct3D11 RenderSystem" TRUE "WIN32;DirectX11_FOUND OR WINDOWS_STORE OR WINDOWS_PHONE" FALSE)
 cmake_dependent_option(OGRE_BUILD_RENDERSYSTEM_GL3PLUS "Build OpenGL 3+ RenderSystem" TRUE "OPENGL_FOUND;NOT WINDOWS_STORE;NOT WINDOWS_PHONE" FALSE)
 cmake_dependent_option(OGRE_BUILD_RENDERSYSTEM_GL "Build OpenGL RenderSystem" TRUE "OPENGL_FOUND;NOT APPLE_IOS;NOT WINDOWS_STORE;NOT WINDOWS_PHONE" FALSE)
-cmake_dependent_option(OGRE_BUILD_RENDERSYSTEM_GLES2 "Build OpenGL ES 2.x RenderSystem" FALSE "OPENGLES2_FOUND;NOT WINDOWS_STORE;NOT WINDOWS_PHONE" FALSE)
+cmake_dependent_option(OGRE_BUILD_RENDERSYSTEM_GLES2 "Build OpenGL ES 2.x RenderSystem" TRUE "OPENGLES2_FOUND;NOT WINDOWS_STORE;NOT WINDOWS_PHONE" FALSE)
 cmake_dependent_option(OGRE_BUILD_RENDERSYSTEM_METAL "Build Metal RenderSystem" FALSE "APPLE" FALSE)
 cmake_dependent_option(OGRE_BUILD_PLUGIN_ASSIMP "Build Open Asset Import plugin" TRUE "ASSIMP_FOUND" FALSE)
 option(OGRE_BUILD_PLUGIN_BSP "Build BSP SceneManager plugin" TRUE)
@@ -343,7 +343,7 @@ cmake_dependent_option(OGRE_BUILD_LIBS_AS_FRAMEWORKS "Build frameworks for libra
 cmake_dependent_option(OGRE_BUILD_TESTS "Build the unit tests & PlayPen" FALSE "OGRE_BUILD_COMPONENT_BITES" FALSE)
 option(OGRE_CONFIG_DOUBLE "Use doubles instead of floats in Ogre" FALSE)
 option(OGRE_CONFIG_NODE_INHERIT_TRANSFORM "Tells the node whether it should inherit full transform from it's parent node or derived position, orientation and scale" FALSE)
-set(OGRE_CONFIG_THREADS "3" CACHE STRING 
+set(OGRE_CONFIG_THREADS "3" CACHE STRING
 	"Enable Ogre thread safety support for multithreading. Possible values:
 	0 - no thread safety. DefaultWorkQueue is not threaded.
 	1 - background resource preparation and loading is thread safe. Threaded DefaultWorkQueue. [DEPRECATED]

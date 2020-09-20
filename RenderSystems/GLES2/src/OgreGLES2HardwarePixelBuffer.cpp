@@ -39,7 +39,6 @@ THE SOFTWARE.
 #include "OgreRoot.h"
 #include "OgreGLSLESProgramManager.h"
 #include "OgreGLSLESLinkProgram.h"
-#include "OgreGLSLESProgramPipeline.h"
 #include "OgreBitwise.h"
 #include "OgreGLNativeSupport.h"
 #include "OgreGLES2HardwareBuffer.h"
@@ -197,12 +196,10 @@ namespace Ogre {
         }
     }
 
-#if OGRE_PLATFORM == OGRE_PLATFORM_ANDROID || OGRE_PLATFORM == OGRE_PLATFORM_EMSCRIPTEN
     void GLES2TextureBuffer::updateTextureId(GLuint textureID)
     {
         mTextureID = textureID;
     }
-#endif
 
     void GLES2TextureBuffer::upload(const PixelBox &data, const Box &dest)
     {
@@ -278,7 +275,7 @@ namespace Ogre {
                         break;
                     OGRE_FALLTHROUGH;
                 case GL_TEXTURE_3D_OES:
-                    OGRE_CHECK_GL_ERROR(glCompressedTexSubImage3DOES(mTarget, mLevel,
+                    OGRE_CHECK_GL_ERROR(glCompressedTexSubImage3D(mTarget, mLevel,
                                               dest.left, dest.top, dest.front,
                                               dest.getWidth(), dest.getHeight(), dest.getDepth(),
                                               format, data.getConsecutiveSize(),
@@ -326,7 +323,7 @@ namespace Ogre {
                         break;
                     OGRE_FALLTHROUGH;
                 case GL_TEXTURE_3D_OES:
-                    OGRE_CHECK_GL_ERROR(glTexSubImage3DOES(
+                    OGRE_CHECK_GL_ERROR(glTexSubImage3D(
                                     mTarget, mLevel,
                                     dest.left, dest.top, dest.front,
                                     dest.getWidth(), dest.getHeight(), dest.getDepth(),
@@ -388,7 +385,7 @@ namespace Ogre {
         {
             case GL_TEXTURE_2D:
             case GL_TEXTURE_CUBE_MAP:
-                OGRE_CHECK_GL_ERROR(glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, mTextureID, 0));
+                OGRE_CHECK_GL_ERROR(glFramebufferTexture2DMultisampleEXT(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, mTextureID, 0, 4));
                 OGRE_CHECK_GL_ERROR(glCheckFramebufferStatus(GL_FRAMEBUFFER));
                 OGRE_CHECK_GL_ERROR(glReadPixels(0, 0, data.getWidth(), data.getHeight(),
                                                  GL_RGBA,
@@ -443,7 +440,7 @@ namespace Ogre {
         GLES2RenderSystem* rs = getGLES2RenderSystem();
 
         // Store old binding so it can be restored later
-        GLint oldfb;
+        GLint oldfb = 0;
         OGRE_CHECK_GL_ERROR(glGetIntegerv(GL_FRAMEBUFFER_BINDING, &oldfb));
 
         // Set up temporary FBO
@@ -542,18 +539,13 @@ namespace Ogre {
         // Bind it to FBO
         OGRE_CHECK_GL_ERROR(glBindRenderbuffer(GL_RENDERBUFFER, mRenderbufferID));
 
-        if(rs->getCapabilities()->hasCapability(RSC_DEBUG))
-        {
-            OGRE_CHECK_GL_ERROR(glLabelObjectEXT(GL_RENDERBUFFER, mRenderbufferID, 0, ("RB " + StringConverter::toString(mRenderbufferID) + " MSAA: " + StringConverter::toString(mNumSamples)).c_str()));
-        }
-
         // Allocate storage for depth buffer
         if (mNumSamples > 0)
         {
-            if(rs->hasMinGLVersion(3, 0) || rs->checkExtension("GL_APPLE_framebuffer_multisample"))
+            if(rs->hasMinGLVersion(3, 0) || rs->checkExtension("GL_CHROMIUM_framebuffer_multisample"))
             {
-                OGRE_CHECK_GL_ERROR(glRenderbufferStorageMultisampleAPPLE(GL_RENDERBUFFER,
-                                                                          mNumSamples, mGLInternalFormat, mWidth, mHeight));
+                OGRE_CHECK_GL_ERROR(glRenderbufferStorageMultisampleCHROMIUM(GL_RENDERBUFFER,
+                                                                             mNumSamples, mGLInternalFormat, mWidth, mHeight));
             }
         }
         else
