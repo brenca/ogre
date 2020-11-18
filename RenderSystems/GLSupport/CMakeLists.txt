@@ -11,7 +11,11 @@
 
 # Add platform specific settings
 
-option(OGRE_GLSUPPORT_USE_EGL "use EGL for GL Context Creation instead of GLX/ WGL" TRUE)
+if(EGL_FOUND)
+  option(OGRE_GLSUPPORT_USE_EGL "use EGL for GL Context Creation instead of GLX/ WGL" FALSE)
+elseif(OGRE_BUILD_RENDERSYSTEM_GLES2CHROMIUM)
+  option(OGRE_GLSUPPORT_USE_EGL "use EGL for GL Context Creation instead of GLX/ WGL" TRUE)
+endif()
 
 if(ANDROID)
   file(GLOB PLATFORM_HEADERS "include/EGL/Android/*.h" "include/EGL/*.h")
@@ -28,12 +32,22 @@ elseif (EMSCRIPTEN)
       ${CMAKE_CURRENT_SOURCE_DIR}/include/EGL
       ${CMAKE_CURRENT_SOURCE_DIR}/include/EGL/Emscripten)
 elseif (WIN32)
-  file(GLOB PLATFORM_HEADERS "include/EGL/WIN32/*.h" "include/EGL/*.h")
-  file(GLOB PLATFORM_SOURCES "src/EGL/WIN32/*.cpp" "src/EGL/*.cpp")
-
-  set(NATIVE_INCLUDES
-    ${CMAKE_CURRENT_SOURCE_DIR}/include/EGL
-    ${CMAKE_CURRENT_SOURCE_DIR}/include/EGL/WIN32)
+  if(OGRE_GLSUPPORT_USE_EGL OR OGRE_BUILD_RENDERSYSTEM_GLES2CHROMIUM)
+      file(GLOB PLATFORM_HEADERS "include/EGL/WIN32/*.h" "include/EGL/*.h")
+      file(GLOB PLATFORM_SOURCES "src/EGL/WIN32/*.cpp" "src/EGL/*.cpp")
+      
+      set(NATIVE_INCLUDES
+        ${CMAKE_CURRENT_SOURCE_DIR}/include/EGL
+        ${CMAKE_CURRENT_SOURCE_DIR}/include/EGL/WIN32)
+  else()
+    file(GLOB PLATFORM_HEADERS "include/win32/*.h")
+    file(GLOB PLATFORM_SOURCES "src/win32/*.cpp")
+    set(NATIVE_INCLUDES
+        ${CMAKE_CURRENT_SOURCE_DIR}/include/win32)
+    if(MINGW)
+        set(PLATFORM_LIBS opengl32)
+    endif()
+  endif()
 elseif(APPLE_IOS)
   # only works with GLES2 - no shared components here.
 elseif (APPLE)
@@ -96,9 +110,9 @@ target_link_libraries(OgreGLSupport PUBLIC OgreMain PRIVATE ${PLATFORM_LIBS})
 target_include_directories(OgreGLSupport PUBLIC 
     "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>"
     "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include/GLSL>"
-    "S:/electron-gp/src"
-    "S:/electron-gp/src/gpu"
-    "S:/electron-gp/src/third_party/khronos"
+    "D:/_DEV/ELECTRON/electron-gn/src"
+    "D:/_DEV/ELECTRON/electron-gn/src/gpu"
+    "D:/_DEV/ELECTRON/electron-gn/src/third_party/khronos"
     PRIVATE "$<BUILD_INTERFACE:${NATIVE_INCLUDES}>")
 
 set_property(TARGET OgreGLSupport PROPERTY POSITION_INDEPENDENT_CODE ON)
