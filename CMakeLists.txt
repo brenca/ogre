@@ -277,9 +277,6 @@ elseif (APPLE AND NOT APPLE_IOS)
   else()
     set(CMAKE_OSX_SYSROOT macosx)
   endif()
-
-  # Make sure that the OpenGL render system is selected for non-iOS Apple builds
-  set(OGRE_BUILD_RENDERSYSTEM_GLES2 FALSE)
 endif ()
 
 if(OGRE_BUILD_COMPONENT_MESHLODGENERATOR)
