@@ -37,24 +37,34 @@ elseif (WIN32)
 elseif(APPLE_IOS)
   # only works with GLES2 - no shared components here.
 elseif (APPLE)
-  file(GLOB PLATFORM_HEADERS "include/OSX/*.h")
-  file(GLOB PLATFORM_SOURCES "src/OSX/*.mm")
+  if(OGRE_GLSUPPORT_USE_EGL)
+    file(GLOB PLATFORM_HEADERS "include/EGL/OSX/*.h" "include/EGL/*.h")
+    file(GLOB PLATFORM_SOURCES "src/EGL/OSX/*.mm" "src/EGL/*.cpp")
 
-  # ignore usage of deprecated OSX API for now
-  add_definitions(-Wno-deprecated-declarations)
+    set(NATIVE_INCLUDES
+      ${CMAKE_CURRENT_SOURCE_DIR}/include/EGL
+      ${CMAKE_CURRENT_SOURCE_DIR}/include/EGL/OSX)
+    set(PLATFORM_LIBS "-framework CoreGraphics" "-framework Foundation" "-framework AppKit")
+  else()
+    file(GLOB PLATFORM_HEADERS "include/OSX/*.h")
+    file(GLOB PLATFORM_SOURCES "src/OSX/*.mm")
 
-  set_source_files_properties("src/OSX/OgreOSXGL3PlusSupport.mm" 
-    PROPERTIES COMPILE_FLAGS "-Wno-cast-qual")
+    # ignore usage of deprecated OSX API for now
+    add_definitions(-Wno-deprecated-declarations)
 
-  set(NATIVE_INCLUDES
-    ${CMAKE_CURRENT_SOURCE_DIR}/include/OSX 
-    ${PROJECT_SOURCE_DIR}/OgreMain/include/OSX)
-  set(PLATFORM_LIBS "-framework CoreGraphics" "-framework Foundation" "-framework AppKit")
+    set_source_files_properties("src/OSX/OgreOSXGL3PlusSupport.mm"
+      PROPERTIES COMPILE_FLAGS "-Wno-cast-qual")
+
+    set(NATIVE_INCLUDES
+      ${CMAKE_CURRENT_SOURCE_DIR}/include/OSX 
+      ${PROJECT_SOURCE_DIR}/OgreMain/include/OSX)
+    set(PLATFORM_LIBS "-framework CoreGraphics" "-framework Foundation" "-framework AppKit")
+  endif()
 elseif (UNIX)
   if(OGRE_GLSUPPORT_USE_EGL)
     file(GLOB PLATFORM_HEADERS "include/EGL/X11/*.h" "include/EGL/*.h")
     file(GLOB PLATFORM_SOURCES "src/EGL/X11/*.cpp" "src/EGL/*.cpp")
-    
+
     set(NATIVE_INCLUDES
         ${CMAKE_CURRENT_SOURCE_DIR}/include/EGL
         ${CMAKE_CURRENT_SOURCE_DIR}/include/EGL/X11)
@@ -66,7 +76,7 @@ elseif (UNIX)
     set(NATIVE_INCLUDES
         ${CMAKE_CURRENT_SOURCE_DIR}/include/GLX
         ${OPENGL_INCLUDE_DIR})
-    
+
     set(PLATFORM_LIBS ${X11_LIBRARIES} ${X11_Xrandr_LIB} ${OPENGL_gl_LIBRARY})
   endif()
 endif ()
@@ -77,13 +87,13 @@ set(GLSUPPORT_HEADERS ${GLSUPPORT_HEADERS} ${PROJECT_BINARY_DIR}/include/OgreGLS
 file(GLOB GLSL_SOURCES src/GLSL/*.cpp)
 
 if(OGRE_CONFIG_ENABLE_GL_STATE_CACHE_SUPPORT)
-  set_source_files_properties(${CMAKE_CURRENT_SOURCE_DIR}/src/OgreGLUniformCache.cpp 
+  set_source_files_properties(${CMAKE_CURRENT_SOURCE_DIR}/src/OgreGLUniformCache.cpp
     PROPERTIES COMPILE_DEFINITIONS OGRE_ENABLE_STATE_CACHE)
 endif()
 
-add_library(OgreGLSupport STATIC 
-    ${GLSUPPORT_HEADERS} ${PLATFORM_HEADERS} ${PLATFORM_SOURCES} ${GLSL_SOURCES} 
-    src/OgreGLRenderSystemCommon.cpp 
+add_library(OgreGLSupport STATIC
+    ${GLSUPPORT_HEADERS} ${PLATFORM_HEADERS} ${PLATFORM_SOURCES} ${GLSL_SOURCES}
+    src/OgreGLRenderSystemCommon.cpp
     src/OgreGLTextureCommon.cpp
     src/OgreGLDepthBufferCommon.cpp
     src/OgreGLRenderTexture.cpp
@@ -93,16 +103,16 @@ add_library(OgreGLSupport STATIC
     src/OgreGLWindow.cpp
 )
 target_link_libraries(OgreGLSupport PUBLIC OgreMain PRIVATE ${PLATFORM_LIBS})
-target_include_directories(OgreGLSupport PUBLIC 
+target_include_directories(OgreGLSupport PUBLIC
     "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>"
     "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include/GLSL>"
-    "S:/electron-gp/src"
-    "S:/electron-gp/src/gpu"
-    "S:/electron-gp/src/third_party/khronos"
+    "/Volumes/MAC-DATA/electron-gp/src"
+    "/Volumes/MAC-DATA/electron-gp/src/gpu"
+    "/Volumes/MAC-DATA/electron-gp/src/third_party/khronos"
     PRIVATE "$<BUILD_INTERFACE:${NATIVE_INCLUDES}>")
 
 set_property(TARGET OgreGLSupport PROPERTY POSITION_INDEPENDENT_CODE ON)
-generate_export_header(OgreGLSupport 
+generate_export_header(OgreGLSupport
     EXPORT_MACRO_NAME _OgreGLExport
     EXPORT_FILE_NAME ${PROJECT_BINARY_DIR}/include/OgreGLSupportPrerequisites.h)
 

@@ -126,7 +126,7 @@ namespace Ogre {
             freeBuffer();
         }
     }
-    
+
     // TextureBuffer
     GLES2TextureBuffer::GLES2TextureBuffer(GLES2Texture* parent, GLint face, GLint level,
                                            GLint width, GLint height, GLint depth)
@@ -158,7 +158,7 @@ namespace Ogre {
 
         // Set up a pixel box
         mBuffer = PixelBox(mWidth, mHeight, mDepth, mFormat);
-        
+
         if (mWidth==0 || mHeight==0 || mDepth==0)
             // We are invalid, do not allocate a buffer
             return;
@@ -350,7 +350,7 @@ namespace Ogre {
         OGRE_CHECK_GL_ERROR(glPixelStorei(GL_UNPACK_ALIGNMENT, 4));
     }
 
-    //-----------------------------------------------------------------------------  
+    //-----------------------------------------------------------------------------
     void GLES2TextureBuffer::download(const PixelBox &data)
     {
         if(data.getSize() != getSize())
@@ -405,21 +405,21 @@ namespace Ogre {
         OGRE_CHECK_GL_ERROR(glDeleteFramebuffers(1, &tempFBO));
     }
 
-    //-----------------------------------------------------------------------------  
+    //-----------------------------------------------------------------------------
     void GLES2TextureBuffer::bindToFramebuffer(uint32 attachment, uint32 zoffset)
     {
         assert(zoffset < mDepth);
         OGRE_CHECK_GL_ERROR(glFramebufferTexture2D(GL_FRAMEBUFFER, attachment,
                                                    mFaceTarget, mTextureID, mLevel));
     }
-    
+
     void GLES2TextureBuffer::copyFromFramebuffer(size_t zoffset)
     {
         getGLES2RenderSystem()->_getStateCacheManager()->bindGLTexture(mTarget, mTextureID);
         OGRE_CHECK_GL_ERROR(glCopyTexSubImage2D(mFaceTarget, mLevel, 0, 0, 0, 0, mWidth, mHeight));
     }
 
-    //-----------------------------------------------------------------------------  
+    //-----------------------------------------------------------------------------
     void GLES2TextureBuffer::blit(const HardwarePixelBufferSharedPtr &src, const Box &srcBox, const Box &dstBox)
     {
         GLES2TextureBuffer *srct = static_cast<GLES2TextureBuffer *>(src.get());
@@ -433,8 +433,8 @@ namespace Ogre {
             GLES2HardwarePixelBuffer::blit(src, srcBox, dstBox);
         }
     }
-    
-    //-----------------------------------------------------------------------------  
+
+    //-----------------------------------------------------------------------------
     void GLES2TextureBuffer::blitFromTexture(GLES2TextureBuffer *src, const Box &srcBox, const Box &dstBox)
     {
         GLES2RenderSystem* rs = getGLES2RenderSystem();
@@ -481,11 +481,11 @@ namespace Ogre {
             OGRE_CHECK_GL_ERROR(glGenerateMipmap(mTarget));
         }
     }
-    //-----------------------------------------------------------------------------  
+    //-----------------------------------------------------------------------------
     // blitFromMemory doing hardware trilinear scaling
     void GLES2TextureBuffer::blitFromMemory(const PixelBox &src, const Box &dstBox)
     {
-        // Fall back to normal GLHardwarePixelBuffer::blitFromMemory in case 
+        // Fall back to normal GLHardwarePixelBuffer::blitFromMemory in case
         // the source dimensions match the destination ones, in which case no scaling is needed
         // FIXME: always uses software path, as blitFromTexture is not implemented
         if(true ||
@@ -515,16 +515,16 @@ namespace Ogre {
         // Delete temp texture
         TextureManager::getSingleton().remove(tex);
     }
-    
+
     RenderTexture *GLES2TextureBuffer::getRenderTarget(size_t zoffset)
     {
         assert(mUsage & TU_RENDERTARGET);
         assert(zoffset < mDepth);
         return mSliceTRT[zoffset];
     }
-    
+
     //********* GLES2RenderBuffer
-    //----------------------------------------------------------------------------- 
+    //-----------------------------------------------------------------------------
     GLES2RenderBuffer::GLES2RenderBuffer(GLenum format, uint32 width, uint32 height, GLsizei numSamples):
     GLES2HardwarePixelBuffer(width, height, 1, GLES2PixelUtil::getClosestOGREFormat(format), HBU_WRITE_ONLY)
     {
@@ -532,7 +532,7 @@ namespace Ogre {
 
         mGLInternalFormat = format;
         mNumSamples = numSamples;
-        
+
         // Generate renderbuffer
         OGRE_CHECK_GL_ERROR(glGenRenderbuffers(1, &mRenderbufferID));
 
@@ -554,12 +554,12 @@ namespace Ogre {
                                                       mWidth, mHeight));
         }
     }
-    //----------------------------------------------------------------------------- 
+    //-----------------------------------------------------------------------------
     GLES2RenderBuffer::~GLES2RenderBuffer()
     {
         OGRE_CHECK_GL_ERROR(glDeleteRenderbuffers(1, &mRenderbufferID));
     }
-    //-----------------------------------------------------------------------------  
+    //-----------------------------------------------------------------------------
     void GLES2RenderBuffer::bindToFramebuffer(uint32 attachment, uint32 zoffset)
     {
         assert(zoffset < mDepth);

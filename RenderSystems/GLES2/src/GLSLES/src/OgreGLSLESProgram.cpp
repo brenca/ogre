@@ -46,7 +46,7 @@ namespace Ogre {
 #endif
     //-----------------------------------------------------------------------
     //-----------------------------------------------------------------------
-    GLSLESProgram::GLSLESProgram(ResourceManager* creator, 
+    GLSLESProgram::GLSLESProgram(ResourceManager* creator,
         const String& name, ResourceHandle handle,
         const String& group, bool isManual, ManualResourceLoader* loader)
         : GLSLShaderCommon(creator, name, handle, group, isManual, loader)
@@ -60,7 +60,7 @@ namespace Ogre {
             setupBaseParamDictionary();
 #if !OGRE_NO_GLES2_GLSL_OPTIMISER
             ParamDictionary* dict = getParamDictionary();
-            dict->addParameter(ParameterDef("use_optimiser", 
+            dict->addParameter(ParameterDef("use_optimiser",
                                             "Should the GLSL optimiser be used. Default is false.",
                                             PT_BOOL),&msCmdOptimisation);
 #endif
@@ -184,7 +184,7 @@ namespace Ogre {
                     }
                 }
             }
-    
+
 #if !OGRE_NO_GLES2_GLSL_OPTIMISER
             const char *source = (getOptimiserEnabled() && getIsOptimised()) ? mOptimisedSource.c_str() : mSource.c_str();
 #else
@@ -210,10 +210,10 @@ namespace Ogre {
             LogManager::getSingleton().stream(LML_WARNING) << getResourceLogName() << " " << compileInfo;
     }
 
-#if !OGRE_NO_GLES2_GLSL_OPTIMISER   
+#if !OGRE_NO_GLES2_GLSL_OPTIMISER
     //-----------------------------------------------------------------------
-    void GLSLESProgram::setOptimiserEnabled(bool enabled) 
-    { 
+    void GLSLESProgram::setOptimiserEnabled(bool enabled)
+    {
         if(mOptimiserEnabled != enabled && mOptimiserEnabled && mCompiled == 1)
         {
             OGRE_CHECK_GL_ERROR(glDeleteShader(mGLShaderHandle));
@@ -222,7 +222,7 @@ namespace Ogre {
             mGLProgramHandle = 0;
             mCompiled = 0;
         }
-        mOptimiserEnabled = enabled; 
+        mOptimiserEnabled = enabled;
     }
 #endif
     //-----------------------------------------------------------------------
@@ -237,7 +237,7 @@ namespace Ogre {
             // destroy all programs using this shader
             GLSLESProgramManager::getSingletonPtr()->destroyAllByShader(this);
 
-            
+
             mGLShaderHandle = 0;
             mGLProgramHandle = 0;
             mLinked = 0;

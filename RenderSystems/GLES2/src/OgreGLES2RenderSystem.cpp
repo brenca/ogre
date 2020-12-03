@@ -52,10 +52,6 @@ THE SOFTWARE.
 #include "OgreGLES2PixelFormat.h"
 #include "OgreGLES2FBOMultiRenderTarget.h"
 
-#if OGRE_PLATFORM == OGRE_PLATFORM_APPLE_IOS
-#include "OgreEAGLES2Context.h"
-#endif
-
 #if OGRE_PLATFORM == OGRE_PLATFORM_ANDROID || OGRE_PLATFORM == OGRE_PLATFORM_EMSCRIPTEN
 #   include "OgreGLES2ManagedResourceManager.h"
 Ogre::GLES2ManagedResourceManager* Ogre::GLES2RenderSystem::mResourceManager = NULL;
@@ -71,13 +67,6 @@ Ogre::GLES2ManagedResourceManager* Ogre::GLES2RenderSystem::mResourceManager = N
 using namespace std;
 
 namespace Ogre {
-
-#if OGRE_PLATFORM != OGRE_PLATFORM_APPLE_IOS && OGRE_PLATFORM != OGRE_PLATFORM_ANDROID
-    static GLNativeSupport* glsupport;
-    static GLESWglProc get_proc(const char* proc) {
-        return (GLESWglProc)glsupport->getProcAddress(proc);
-    }
-#endif
 
     static GLint getCombinedMinMipFilter(FilterOptions min, FilterOptions mip)
     {
@@ -141,12 +130,8 @@ namespace Ogre {
 #if OGRE_PLATFORM == OGRE_PLATFORM_ANDROID || OGRE_PLATFORM == OGRE_PLATFORM_EMSCRIPTEN
         mResourceManager = OGRE_NEW GLES2ManagedResourceManager();
 #endif
-        
+
         mGLSupport = getGLSupport(GLNativeSupport::CONTEXT_ES);
-        
-#if OGRE_PLATFORM != OGRE_PLATFORM_APPLE_IOS && OGRE_PLATFORM != OGRE_PLATFORM_ANDROID && OGRE_PLATFORM != OGRE_PLATFORM_WIN32
-        glsupport = mGLSupport;
-#endif
 
         initConfigOptions();
 
@@ -275,7 +260,7 @@ namespace Ogre {
                checkExtension("GL_IMG_texture_compression_pvrtc2") ||
                checkExtension("WEBGL_compressed_texture_pvrtc"))
                 rsc->setCapability(RSC_TEXTURE_COMPRESSION_PVRTC);
-                
+
             if((checkExtension("GL_EXT_texture_compression_dxt1") &&
                checkExtension("GL_EXT_texture_compression_s3tc")) ||
                checkExtension("WEBGL_compressed_texture_s3tc"))
@@ -333,7 +318,7 @@ namespace Ogre {
 
         // DOT3 support is standard
         rsc->setCapability(RSC_DOT3);
-        
+
         // Point size
         GLfloat psRange[2] = {0.0, 0.0};
         OGRE_CHECK_GL_ERROR(glGetFloatv(GL_ALIASED_POINT_SIZE_RANGE, psRange));
@@ -342,7 +327,7 @@ namespace Ogre {
         // Point sprites
         rsc->setCapability(RSC_POINT_SPRITES);
         rsc->setCapability(RSC_POINT_EXTENDED_PARAMETERS);
-        
+
         // GLSL ES is always supported in GL ES 2
         rsc->addShaderProfile("glsles");
         if (getNativeShadingLanguageVersion() >= 320)
@@ -426,10 +411,10 @@ namespace Ogre {
         // Alpha to coverage always 'supported' when MSAA is available
         // although card may ignore it if it doesn't specifically support A2C
         rsc->setCapability(RSC_ALPHA_TO_COVERAGE);
-        
+
         // No point sprites, so no size
         rsc->setMaxPointSize(0.f);
-        
+
         if(hasMinGLVersion(3, 0) || checkExtension("GL_OES_vertex_array_object"))
             rsc->setCapability(RSC_VAO);
 
@@ -719,39 +704,39 @@ namespace Ogre {
     void GLES2RenderSystem::_destroyDepthBuffer(RenderTarget* pWin)
     {
         GLContext *windowContext = dynamic_cast<GLRenderTarget*>(pWin)->getContext();
-        
+
         // 1 Window <-> 1 Context, should be always true
         assert( windowContext );
-        
+
         bool bFound = false;
         // Find the depth buffer from this window and remove it.
         DepthBufferMap::iterator itMap = mDepthBufferPool.begin();
         DepthBufferMap::iterator enMap = mDepthBufferPool.end();
-        
+
         while( itMap != enMap && !bFound )
         {
             DepthBufferVec::iterator itor = itMap->second.begin();
             DepthBufferVec::iterator end  = itMap->second.end();
-            
+
             while( itor != end )
             {
                 // A DepthBuffer with no depth & stencil pointers is a dummy one,
                 // look for the one that matches the same GL context
                 GLES2DepthBuffer *depthBuffer = static_cast<GLES2DepthBuffer*>(*itor);
                 GLContext *glContext = depthBuffer->getGLContext();
-                
+
                 if( glContext == windowContext &&
                    (depthBuffer->getDepthBuffer() || depthBuffer->getStencilBuffer()) )
                 {
                     bFound = true;
-                    
+
                     delete *itor;
                     itMap->second.erase( itor );
                     break;
                 }
                 ++itor;
             }
-            
+
             ++itMap;
         }
     }
@@ -917,11 +902,11 @@ namespace Ogre {
         else if (vp != mActiveViewport || vp->_isUpdated())
         {
             RenderTarget* target;
-            
+
             target = vp->getTarget();
             _setRenderTarget(target);
             mActiveViewport = vp;
-            
+
             // Calculate the "lower-left" corner of the viewport
             Rect vpRect = vp->getActualDimensions();
             if (!target->requiresTextureFlipping())
@@ -931,11 +916,11 @@ namespace Ogre {
                 vpRect.top = target->getHeight() - vpRect.top;
                 vpRect.bottom = target->getHeight() - vpRect.bottom;
             }
-            
+
 #if OGRE_NO_VIEWPORT_ORIENTATIONMODE == 0
             ConfigOptionMap::const_iterator opt;
             ConfigOptionMap::const_iterator end = mGLSupport->getConfigOptions().end();
-            
+
             if ((opt = mGLSupport->getConfigOptions().find("Orientation")) != end)
             {
                 String val = opt->second.currentValue;
@@ -1001,7 +986,7 @@ namespace Ogre {
                 }
                 break;
             case CULL_ANTICLOCKWISE:
-                if (mActiveRenderTarget && 
+                if (mActiveRenderTarget &&
                     ((mActiveRenderTarget->requiresTextureFlipping() && !mInvertVertexWinding) ||
                     (!mActiveRenderTarget->requiresTextureFlipping() && mInvertVertexWinding)))
                 {
@@ -1106,7 +1091,7 @@ namespace Ogre {
     {
         if(hasMinGLVersion(3, 0) || checkExtension("GL_EXT_occlusion_query_boolean"))
         {
-            GLES2HardwareOcclusionQuery* ret = new GLES2HardwareOcclusionQuery(); 
+            GLES2HardwareOcclusionQuery* ret = new GLES2HardwareOcclusionQuery();
             mHwOcclusionQueries.push_back(ret);
             return ret;
         }
@@ -1160,7 +1145,7 @@ namespace Ogre {
             if (!mCurrentCapabilities->hasCapability(RSC_TWO_SIDED_STENCIL))
                 OGRE_EXCEPT(Exception::ERR_INVALIDPARAMS, "2-sided stencils are not supported",
                             "GLES2RenderSystem::setStencilBufferParams");
-            
+
             // NB: We should always treat CCW as front face for consistent with default
             // culling mode. Therefore, we must take care with two-sided stencil settings.
             flip = (mInvertVertexWinding && !mActiveRenderTarget->requiresTextureFlipping()) ||
@@ -1170,7 +1155,7 @@ namespace Ogre {
             OGRE_CHECK_GL_ERROR(glStencilFuncSeparate(GL_BACK, convertCompareFunction(func), refValue, compareMask));
             OGRE_CHECK_GL_ERROR(glStencilOpSeparate(GL_BACK,
                                                     convertStencilOp(stencilFailOp, !flip),
-                                                    convertStencilOp(depthFailOp, !flip), 
+                                                    convertStencilOp(depthFailOp, !flip),
                                                     convertStencilOp(passOp, !flip)));
 
             // Front
@@ -1178,7 +1163,7 @@ namespace Ogre {
             OGRE_CHECK_GL_ERROR(glStencilFuncSeparate(GL_FRONT, convertCompareFunction(func), refValue, compareMask));
             OGRE_CHECK_GL_ERROR(glStencilOpSeparate(GL_FRONT,
                                                     convertStencilOp(stencilFailOp, flip),
-                                                    convertStencilOp(depthFailOp, flip), 
+                                                    convertStencilOp(depthFailOp, flip),
                                                     convertStencilOp(passOp, flip)));
         }
         else
@@ -1188,23 +1173,23 @@ namespace Ogre {
             OGRE_CHECK_GL_ERROR(glStencilFunc(convertCompareFunction(func), refValue, compareMask));
             OGRE_CHECK_GL_ERROR(glStencilOp(
                                             convertStencilOp(stencilFailOp, flip),
-                                            convertStencilOp(depthFailOp, flip), 
+                                            convertStencilOp(depthFailOp, flip),
                                             convertStencilOp(passOp, flip)));
         }
     }
 
     void GLES2RenderSystem::_setTextureUnitFiltering(size_t unit, FilterOptions minFilter,
                 FilterOptions magFilter, FilterOptions mipFilter)
-    {       
+    {
         mMipFilter = mipFilter;
         if(mCurTexMipCount == 0 && mMipFilter != FO_NONE)
         {
-            mMipFilter = FO_NONE;           
+            mMipFilter = FO_NONE;
         }
         _setTextureUnitFiltering(unit, FT_MAG, magFilter);
         _setTextureUnitFiltering(unit, FT_MIN, minFilter);
     }
-                
+
     void GLES2RenderSystem::_setTextureUnitFiltering(size_t unit, FilterType ftype, FilterOptions fo)
     {
         if (!mStateCacheManager->activateGLTextureUnit(unit))
@@ -1243,7 +1228,7 @@ namespace Ogre {
                 mStateCacheManager->setTexParameteri(mTextureTypes[unit],
                                                      GL_TEXTURE_MIN_FILTER,
                                                      getCombinedMinMipFilter(mMinFilter, mMipFilter));
-                
+
                 break;
         }
     }
@@ -1470,10 +1455,6 @@ namespace Ogre {
             setScissorTest(true, vpRect);
         }
 
-#if OGRE_PLATFORM == OGRE_PLATFORM_APPLE_IOS
-        static_cast<EAGLES2Context*>(mCurrentContext)->mDiscardBuffers = buffers;
-#endif
-
         // Clear buffers
         OGRE_CHECK_GL_ERROR(glClear(flags));
 
@@ -1509,7 +1490,7 @@ namespace Ogre {
             GLSLESProgramManager::getSingleton().setActiveShader(GPT_VERTEX_PROGRAM, NULL);
         if (mCurrentFragmentProgram)
             GLSLESProgramManager::getSingleton().setActiveShader(GPT_FRAGMENT_PROGRAM, NULL);
-        
+
         // Disable textures
         _disableTextureUnitsFrom(0);
 
@@ -1541,7 +1522,7 @@ namespace Ogre {
             GLSLESProgramManager::getSingleton().setActiveShader(GPT_VERTEX_PROGRAM, mCurrentVertexProgram);
         if (mCurrentFragmentProgram)
             GLSLESProgramManager::getSingleton().setActiveShader(GPT_FRAGMENT_PROGRAM, mCurrentFragmentProgram);
-        
+
         // Must reset depth/colour write mask to according with user desired, otherwise,
         // clearFrameBuffer would be wrong because the value we are recorded may be
         // difference with the really state stored in GL context.
@@ -1557,7 +1538,7 @@ namespace Ogre {
     {
         if(HardwareBufferManager::getSingletonPtr())
             static_cast<GLES2HardwareBufferManager*>(HardwareBufferManager::getSingletonPtr())->notifyContextDestroyed(context);
-        
+
         for(RenderTargetMap::iterator it = mRenderTargets.begin(); it!=mRenderTargets.end(); ++it)
         {
             if(auto target = dynamic_cast<GLRenderTarget*>(it->second))
@@ -1566,7 +1547,7 @@ namespace Ogre {
                     fbo->notifyContextDestroyed(context);
             }
         }
-        
+
         if (mCurrentContext == context)
         {
             // Change the context to something else so that a valid context
@@ -1602,7 +1583,7 @@ namespace Ogre {
         else
             OGRE_CHECK_GL_ERROR(glDeleteVertexArraysOES(1, &vao));
     }
-    
+
     void GLES2RenderSystem::_destroyFbo(GLContext* context, uint32 fbo)
     {
         if(context != mCurrentContext)
@@ -1641,13 +1622,9 @@ namespace Ogre {
         if (mCurrentContext)
             mCurrentContext->setCurrent();
 
-#if OGRE_PLATFORM == OGRE_PLATFORM_APPLE_IOS || OGRE_PLATFORM == OGRE_PLATFORM_ANDROID || OGRE_PLATFORM == OGRE_PLATFORM_WIN32
         // ios: EAGL2Support redirects to glesw for get_proc. Overwriting it there would create an infinite loop
         // android: eglGetProcAddress fails in some cases (e.g. Virtual Device), whereas dlsym always works.
         if (glGetError == NULL && gleswInit())
-#else
-        if (gleswInit2(get_proc))
-#endif
         {
             OGRE_EXCEPT(Exception::ERR_RENDERINGAPI_ERROR,
                         "Could not initialize glesw",
@@ -1751,11 +1728,11 @@ namespace Ogre {
     {
         if (!prg)
         {
-            OGRE_EXCEPT(Exception::ERR_RENDERINGAPI_ERROR, 
+            OGRE_EXCEPT(Exception::ERR_RENDERINGAPI_ERROR,
                         "Null program bound.",
                         "GLES2RenderSystem::bindGpuProgram");
         }
-        
+
         GLSLESProgram* glprg = static_cast<GLSLESProgram*>(prg);
 
         switch (glprg->getType())
@@ -1763,14 +1740,14 @@ namespace Ogre {
             case GPT_VERTEX_PROGRAM:
                 mCurrentVertexProgram = glprg;
                 break;
-                
+
             case GPT_FRAGMENT_PROGRAM:
                 mCurrentFragmentProgram = glprg;
                 break;
             default:
                 break;
         }
-        
+
         // Bind the program
         GLSLESProgramManager::getSingleton().setActiveShader(glprg->getType(), glprg);
 
@@ -1866,28 +1843,28 @@ namespace Ogre {
         LogManager::getSingleton().logMessage("********************************************");
         LogManager::getSingleton().logMessage("*** OpenGL ES 2.x Reset Renderer Started ***");
         LogManager::getSingleton().logMessage("********************************************");
-                
+
         initialiseContext(win);
-        
+
         static_cast<GLES2FBOManager*>(mRTTManager)->_reload();
-        
+
         _destroyDepthBuffer(win);
-        
+
         GLES2DepthBuffer *depthBuffer = OGRE_NEW GLES2DepthBuffer( DepthBuffer::POOL_DEFAULT, this,
                                                                   mMainContext, 0, 0,
                                                                   win->getWidth(), win->getHeight(),
                                                                   win->getFSAA(), true );
-        
+
         mDepthBufferPool[depthBuffer->getPoolId()].push_back( depthBuffer );
         win->attachDepthBuffer( depthBuffer );
-        
+
         GLES2RenderSystem::mResourceManager->notifyOnContextReset();
-        
+
         mStateCacheManager->clearCache();
         _setViewport(NULL);
         _setRenderTarget(win);
     }
-    
+
     GLES2ManagedResourceManager* GLES2RenderSystem::getResourceManager()
     {
         return GLES2RenderSystem::mResourceManager;
