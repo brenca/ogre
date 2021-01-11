@@ -68,7 +68,7 @@ if (OGRE_CONFIG_THREADS)
 
 endif()
 
-set(OGRE_ASSERT_MODE 1 CACHE STRING 
+set(OGRE_ASSERT_MODE 1 CACHE STRING
 	"Enable Ogre asserts and exceptions. Possible values:
 	0 - Standard asserts in debug builds, nothing in release builds.
 	1 - Standard asserts in debug builds, exceptions in release builds.
@@ -202,7 +202,7 @@ if (UNIX)
     configure_file(${OGRE_TEMPLATES_DIR}/OGRE-MeshLodGenerator.pc.in ${PROJECT_BINARY_DIR}/pkgconfig/OGRE-MeshLodGenerator.pc @ONLY)
     install(FILES ${PROJECT_BINARY_DIR}/pkgconfig/OGRE-MeshLodGenerator.pc DESTINATION ${OGRE_LIB_DIRECTORY}/pkgconfig)
   endif ()
-  
+
   if (OGRE_BUILD_COMPONENT_TERRAIN)
     if (OGRE_BUILD_COMPONENT_PAGING)
       set(OGRE_PAGING_ADDITIONAL_PACKAGES ", OGRE-Paging = ${OGRE_VERSION}")

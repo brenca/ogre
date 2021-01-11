@@ -29,7 +29,7 @@ if(OGRE_BUILD_PLATFORM_EMSCRIPTEN)
     "${PROJECT_SOURCE_DIR}/../EmscriptenDependencies"
   )
 elseif(APPLE_IOS)
-  set(OGRE_DEP_SEARCH_PATH 
+  set(OGRE_DEP_SEARCH_PATH
     ${OGRE_DEPENDENCIES_DIR}
     ${ENV_OGRE_DEPENDENCIES_DIR}
     "${PROJECT_BINARY_DIR}/iOSDependencies"
@@ -38,7 +38,7 @@ elseif(APPLE_IOS)
     "${PROJECT_SOURCE_DIR}/../iOSDependencies"
   )
 elseif(OGRE_BUILD_PLATFORM_ANDROID)
-  set(OGRE_DEP_SEARCH_PATH 
+  set(OGRE_DEP_SEARCH_PATH
     ${OGRE_DEPENDENCIES_DIR}
     ${ENV_OGRE_DEPENDENCIES_DIR}
     "${PROJECT_BINARY_DIR}/AndroidDependencies"
@@ -47,7 +47,7 @@ elseif(OGRE_BUILD_PLATFORM_ANDROID)
     "${PROJECT_SOURCE_DIR}/../AndroidDependencies"
   )
 else()
-  set(OGRE_DEP_SEARCH_PATH 
+  set(OGRE_DEP_SEARCH_PATH
     ${OGRE_DEPENDENCIES_DIR}
     ${ENV_OGRE_DEPENDENCIES_DIR}
     "${PROJECT_BINARY_DIR}/Dependencies"
@@ -64,14 +64,14 @@ if(CMAKE_CROSSCOMPILING)
     set(CMAKE_FIND_ROOT_PATH ${OGREDEPS_PATH} "${CMAKE_FIND_ROOT_PATH}")
 
     set(CROSS -DCMAKE_TOOLCHAIN_FILE=${CMAKE_TOOLCHAIN_FILE})
-    
+
     if(ANDROID)
         set(CROSS ${CROSS}
             -DANDROID_NATIVE_API_LEVEL=${ANDROID_NATIVE_API_LEVEL}
             -DANDROID_ABI=${ANDROID_ABI}
             -DANDROID_NDK=${ANDROID_NDK})
     endif()
-    
+
     if(APPLE_IOS)
         set(CROSS ${CROSS}
             -DIOS_PLATFORM=${IOS_PLATFORM})
@@ -110,17 +110,17 @@ set(CMAKE_FRAMEWORK_PATH ${CMAKE_FRAMEWORK_PATH} ${OGRE_DEP_SEARCH_PATH})
 if(OGRE_BUILD_DEPENDENCIES AND NOT EXISTS ${OGREDEPS_PATH})
     if(MSVC OR EMSCRIPTEN OR MINGW) # other platforms ship zlib
         message(STATUS "Building zlib")
-        file(DOWNLOAD 
+        file(DOWNLOAD
             http://zlib.net/zlib-1.2.11.tar.gz
-            ${PROJECT_BINARY_DIR}/zlib-1.2.11.tar.gz 
+            ${PROJECT_BINARY_DIR}/zlib-1.2.11.tar.gz
             EXPECTED_MD5 1c9f62f0778697a09d36121ead88e08e)
-        execute_process(COMMAND ${CMAKE_COMMAND} 
+        execute_process(COMMAND ${CMAKE_COMMAND}
             -E tar xf zlib-1.2.11.tar.gz WORKING_DIRECTORY ${PROJECT_BINARY_DIR})
         execute_process(COMMAND ${BUILD_COMMAND_COMMON}
             -DBUILD_SHARED_LIBS=${OGREDEPS_SHARED}
             ${PROJECT_BINARY_DIR}/zlib-1.2.11
             WORKING_DIRECTORY ${PROJECT_BINARY_DIR}/zlib-1.2.11)
-        execute_process(COMMAND ${CMAKE_COMMAND} 
+        execute_process(COMMAND ${CMAKE_COMMAND}
             --build ${PROJECT_BINARY_DIR}/zlib-1.2.11 ${BUILD_COMMAND_OPTS})
     endif()
 
@@ -137,7 +137,7 @@ if(OGRE_BUILD_DEPENDENCIES AND NOT EXISTS ${OGREDEPS_PATH})
         -DBUILD_SHARED_LIBS=${OGREDEPS_SHARED}
         ${PROJECT_BINARY_DIR}/zziplib-0.13.71
         WORKING_DIRECTORY ${PROJECT_BINARY_DIR}/zziplib-0.13.71)
-    execute_process(COMMAND ${CMAKE_COMMAND} 
+    execute_process(COMMAND ${CMAKE_COMMAND}
         --build ${PROJECT_BINARY_DIR}/zziplib-0.13.71 ${BUILD_COMMAND_OPTS})
 
     message(STATUS "Building pugixml")
@@ -184,7 +184,7 @@ if(OGRE_BUILD_DEPENDENCIES AND NOT EXISTS ${OGREDEPS_PATH})
         file(DOWNLOAD
             https://libsdl.org/release/SDL2-2.0.10.tar.gz
             ${PROJECT_BINARY_DIR}/SDL2-2.0.10.tar.gz)
-        execute_process(COMMAND ${CMAKE_COMMAND} 
+        execute_process(COMMAND ${CMAKE_COMMAND}
             -E tar xf SDL2-2.0.10.tar.gz WORKING_DIRECTORY ${PROJECT_BINARY_DIR})
         execute_process(COMMAND ${CMAKE_COMMAND}
             -E make_directory ${PROJECT_BINARY_DIR}/SDL2-build)
@@ -265,11 +265,15 @@ endif()
 find_package(OpenGLES2)
 macro_log_feature(OPENGLES2_FOUND "OpenGL ES 2.x" "Support for the OpenGL ES 2.x render system" "http://www.khronos.org/opengles/" FALSE "" "")
 
+# Find OpenGL ES 2.x Chromium
+find_package(OpenGLES2CHR)
+macro_log_feature(OPENGLES2CHR_FOUND "OpenGL ES 2.x Electron/Chromium" "Support for the OpenGL ES 2.x render system via Electron/Chromium" "http://www.khronos.org/opengles/" FALSE "" "")
+
 # Find DirectX
 if(WIN32)
 	find_package(DirectX)
 	macro_log_feature(DirectX9_FOUND "DirectX9" "Support for the DirectX render system" "http://msdn.microsoft.com/en-us/directx/" FALSE "" "")
-	
+
 	find_package(DirectX11)
 	macro_log_feature(DirectX11_FOUND "DirectX11" "Support for the DirectX11 render system" "http://msdn.microsoft.com/en-us/directx/" FALSE "" "")
 

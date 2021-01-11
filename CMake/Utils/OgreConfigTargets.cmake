@@ -48,7 +48,7 @@ if (WIN32)
   set(OGRE_LIB_RELWDBG_PATH "")
   set(OGRE_LIB_MINSIZE_PATH "")
   set(OGRE_LIB_DEBUG_PATH "")
-  set(OGRE_PLUGIN_PATH "/OGRE")
+  set(OGRE_PLUGIN_PATH "/")
   set(OGRE_SAMPLE_PATH "/OGRE/Samples")
 elseif (UNIX)
   set(OGRE_RELEASE_PATH "")
@@ -126,7 +126,7 @@ function(ogre_install_target TARGETNAME SUFFIX EXPORT)
 	else()
 	  install(TARGETS ${TARGETNAME}
 		CONFIGURATIONS Release None ""
-		BUNDLE DESTINATION "bin${OGRE_RELEASE_PATH}" 
+		BUNDLE DESTINATION "bin${OGRE_RELEASE_PATH}"
 		RUNTIME DESTINATION "bin${OGRE_RELEASE_PATH}"
 		LIBRARY DESTINATION "${OGRE_LIB_DIRECTORY}${OGRE_LIB_RELEASE_PATH}${SUFFIX}"
 		ARCHIVE DESTINATION "${OGRE_LIB_DIRECTORY}${OGRE_LIB_RELEASE_PATH}${SUFFIX}"
@@ -201,7 +201,7 @@ function(ogre_config_lib LIBNAME EXPORT)
 	endif ()
   endif (OGRE_STATIC)
   ogre_install_target(${LIBNAME} "" ${EXPORT})
-  
+
   if (OGRE_INSTALL_PDB)
     # install debug pdb files
     if (OGRE_STATIC)
@@ -314,7 +314,7 @@ function(ogre_config_sample_common SAMPLENAME)
   if (OGRE_PROJECT_FOLDERS)
     set_property(TARGET ${LIBNAME} PROPERTY FOLDER Samples)
   endif ()
-  
+
   if (APPLE)
     # On OS X, create .app bundle
     set_property(TARGET ${SAMPLENAME} PROPERTY MACOSX_BUNDLE TRUE)
@@ -342,7 +342,7 @@ function(ogre_config_sample_common SAMPLENAME)
   if (OGRE_INSTALL_SAMPLES AND NOT OGRE_STATIC)
 	ogre_install_target(${SAMPLENAME} ${OGRE_SAMPLE_PATH} FALSE)
   endif()
-  
+
 endfunction(ogre_config_sample_common)
 
 function(ogre_config_sample_exe SAMPLENAME)
@@ -413,6 +413,6 @@ function(ogre_config_tool TOOLNAME)
         CONFIGURATIONS RelWithDebInfo
         )
     endif ()
-  endif ()	
+  endif ()
 
 endfunction(ogre_config_tool)
