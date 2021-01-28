@@ -79,8 +79,8 @@ namespace Ogre {
 
     void GLES2Texture::_createGLTexResource()
     {
-        const RenderSystemCapabilities *renderCaps =
-                Root::getSingleton().getRenderSystem()->getCapabilities();
+        GLES2RenderSystem* rs = getGLES2RenderSystem();
+        const RenderSystemCapabilities *renderCaps = rs->getCapabilities();
 
         const bool nonPowerOfTwoSupported = renderCaps->hasCapability(RSC_NON_POWER_OF_2_TEXTURES) ||
                                             ( renderCaps->getNonPOW2TexturesLimited() &&
@@ -161,6 +161,11 @@ namespace Ogre {
                 OGRE_CHECK_GL_ERROR(glTexParameteri(texTarget, GL_TEXTURE_SWIZZLE_B, GL_ZERO));
                 OGRE_CHECK_GL_ERROR(glTexParameteri(texTarget, GL_TEXTURE_SWIZZLE_A, GL_RED));
             }
+        }
+
+        if ((mUsage & TU_RENDERTARGET) && rs->checkExtension("GL_ANGLE_texture_usage"))
+        {
+          OGRE_CHECK_GL_ERROR(glTexParameteri(texTarget, GL_TEXTURE_USAGE_ANGLE, GL_FRAMEBUFFER_ATTACHMENT_ANGLE));
         }
 
         // Allocate internal buffer so that glTexSubImageXD can be used

@@ -13,7 +13,7 @@
 
 if(EGL_FOUND)
   option(OGRE_GLSUPPORT_USE_EGL "use EGL for GL Context Creation instead of GLX/ WGL" FALSE)
-elseif(OGRE_BUILD_RENDERSYSTEM_GLES2CHROMIUM)
+elseif (OGRE_BUILD_RENDERSYSTEM_GLES2CHROMIUM)
   option(OGRE_GLSUPPORT_USE_EGL "use EGL for GL Context Creation instead of GLX/ WGL" TRUE)
 endif()
 
@@ -66,10 +66,11 @@ elseif (APPLE)
     # ignore usage of deprecated OSX API for now
     add_definitions(-Wno-deprecated-declarations)
 
-  set(NATIVE_INCLUDES
-    ${CMAKE_CURRENT_SOURCE_DIR}/include/OSX
-    ${PROJECT_SOURCE_DIR}/OgreMain/include/OSX)
-  set(PLATFORM_LIBS "-framework CoreGraphics" "-framework Foundation" "-framework AppKit")
+    set(NATIVE_INCLUDES
+      ${CMAKE_CURRENT_SOURCE_DIR}/include/OSX
+      ${PROJECT_SOURCE_DIR}/OgreMain/include/OSX)
+    set(PLATFORM_LIBS "-framework CoreGraphics" "-framework Foundation" "-framework AppKit")
+  endif()
 elseif (UNIX)
   if(OGRE_GLSUPPORT_USE_EGL)
     file(GLOB PLATFORM_HEADERS "include/EGL/X11/*.h" "include/EGL/*.h")
@@ -124,4 +125,10 @@ generate_export_header(OgreGLSupport
     EXPORT_MACRO_NAME _OgreGLExport
     EXPORT_FILE_NAME ${PROJECT_BINARY_DIR}/include/OgreGLSupportPrerequisites.h)
 
-ogre_config_component(OgreGLSupport)
+if(OGRE_STATIC OR OGRE_BUILD_RENDERSYSTEM_GLES2CHROMIUM)
+  ogre_config_lib(OgreGLSupport TRUE)
+endif()
+
+if (OGRE_BUILD_RENDERSYSTEM_GLES2CHROMIUM)
+  install(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/include/GLSL/ DESTINATION include/OGRE/RenderSystems/GLES2)
+endif()
