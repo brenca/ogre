@@ -278,11 +278,11 @@ namespace Ogre {
     void Win32EGLWindow::resize( unsigned int width, unsigned int height )
     {
 		// Case window resized.
-		if (width != mWidth || height != mHeight)
-		{
-			mWidth  = width;
-			mHeight = height;
-
+        if (width != mWidth || height != mHeight)
+        {
+            mWidth = width;
+            mHeight = height;
+        }
     }
 
     void Win32EGLWindow::windowMovedOrResized()
